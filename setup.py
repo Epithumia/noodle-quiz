@@ -10,6 +10,7 @@ setup(name='noodle-quiz',
       version='0.1',
       description='Noodle-Quiz (Not Moodle Quiz generator) is a set of utilities to generate quizzes for Moodle',
       long_description=readme(),
+      long_description_content_type='text/markdown',
       classifiers=[
           'Development Status :: 3 - Alpha',
           'License :: OSI Approved :: MIT License',
