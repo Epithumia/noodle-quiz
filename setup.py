@@ -6,8 +6,8 @@ def readme():
         return f.read()
 
 
-setup(name='noodle-quiz',
-      version='0.1.1',
+setup(name='noodle_quiz',
+      version='0.1.2',
       description='Noodle-Quiz (Not Moodle Quiz generator) is a set of utilities to generate quizzes for Moodle',
       long_description=readme(),
       long_description_content_type='text/markdown',
@@ -20,6 +20,6 @@ setup(name='noodle-quiz',
       author='Epithumia',
       author_email='rafael.lopez@universite-paris-saclay.fr',
       license='MIT',
-      packages=['noodle-quiz'],
+      packages=['noodle_quiz'],
       include_package_data=True,
       zip_safe=False)
