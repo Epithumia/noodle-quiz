@@ -1,7 +1,7 @@
 from typing import List
 
 from .exc import MandatoryFieldMissing, InvalidFieldValue
-from .answer_types import NumericAnswer, ClozeAnswer
+from .answer_types import NumericAnswer, ClozeAnswer, MultipleChoiceAnswer
 
 
 class Question:
@@ -140,4 +140,86 @@ class Cloze(Question):
         s += f'<penalty>{str(self.penalty)}</penalty>\n'
         s += f'<hidden>{self.hidden}</hidden>\n'
         s += '</question>\n'
+        return s
+
+
+class MultipleChoice(Question):
+    def __init__(self, name: str, question_text: str, answers: List[MultipleChoiceAnswer], general_feedback='',
+                 default_grade=1, penalty=0.333333, hidden=False, single_choice=True, shuffle_answers=True,
+                 answer_numbering='abc', show_std_instructions=True, correct_feedback='',
+                 partially_correct_feedback='', incorrect_feedback='', show_num_correct=True):
+        if name is None:
+            raise MandatoryFieldMissing('name')
+        self.name = name
+
+        if question_text is None:
+            raise MandatoryFieldMissing('question_text')
+        self.question_text = question_text
+
+        if len(answers) == 0:
+            raise InvalidFieldValue('answers', answers, 'answers must be a non-empty list of MultipleChoiceAnswer')
+
+        self.answers = answers
+        self.general_feedback = general_feedback
+        self.default_grade = default_grade
+        self.penalty = penalty
+        self.hidden = hidden
+        self.single_choice = single_choice
+        self.shuffle_answers = shuffle_answers
+        if answer_numbering not in ['abc']:
+            raise InvalidFieldValue('answer_numbering', answer_numbering, str(['abc']))
+        self.answer_numbering = answer_numbering
+        self.show_std_instructions = show_std_instructions
+        self.correct_feedback = correct_feedback
+        self.partially_correct_feedback = partially_correct_feedback
+        self.incorrect_feedback = incorrect_feedback
+        self.show_num_correct = show_num_correct
+        self.validate()
+
+    def validate(self):
+        total = 0
+        if not self.single_choice:
+            for a in self.answers:
+                if a.fraction > 0:
+                    total += a.fraction
+            if total < 100:
+                raise InvalidFieldValue('Sum of answer fractions', total, 'The total of fractions is less than 100%')
+            if total > 100:
+                raise InvalidFieldValue('Sum of answer fractions', total, 'The total of fractions is greater than 100%')
+        else:
+            for a in self.answers:
+                if a.fraction == 100:
+                    total += 1
+                elif 0 < a.fraction < 100:
+                    raise InvalidFieldValue('Answers', total,
+                                            'There cannot be partially correct (0<fraction<100) answers')
+            if total < 1:
+                raise InvalidFieldValue('Correct answer', total, 'There must be one correct (fraction=100) answer')
+            if total > 1:
+                raise InvalidFieldValue('Correct answer', total, 'There must be only one correct (fraction=100) answer')
+
+    def __str__(self):
+        s = '<question type="multichoice">\n'
+        s += f'<name><text>{self.name}</text></name>\n'
+        s += f'<questiontext format="html"><text><![CDATA[{self.question_text}]]></text></questiontext>\n'
+        s += f'<generalfeedback format="html"><text>{self.general_feedback}</text></generalfeedback>\n'
+        s += f'<defaultgrade>{self.default_grade}</defaultgrade>\n'
+        s += f'<penalty>{self.penalty}</penalty>\n'
+        s += f'<hidden>{1 if self.hidden else 0}</hidden>\n'
+        s += f'<idnumber></idnumber>\n<single>{"true" if self.single_choice else "false"}</single>\n'
+        s += f'<shuffleanswers>{"true" if self.shuffle_answers else "false"}</shuffleanswers>\n'
+        s += f'<answernumbering>{self.answer_numbering}</answernumbering>\n'
+        s += f'<showstandardinstruction>{self.show_std_instructions}</showstandardinstruction>\n'
+        s += f'<correctfeedback format="html"><text>{self.correct_feedback}</text></correctfeedback>\n'
+        s += f'<partiallycorrectfeedback format="html">' \
+             f'<text>{self.partially_correct_feedback}</text>' \
+             f'</partiallycorrectfeedback>\n'
+        s += f'<incorrectfeedback format="html">' \
+             f'<text>{self.incorrect_feedback}</text>' \
+             f'</incorrectfeedback>\n'
+        if self.show_num_correct:
+            s += '<shownumcorrect/>\n'
+        for a in self.answers:
+            s += str(a)
+        s += '</question>'
         return s

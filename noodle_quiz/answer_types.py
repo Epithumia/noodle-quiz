@@ -74,3 +74,24 @@ class ClozeAnswer(Answer):
         s += '}\n'
         s += f'{self.text_after}'
         return s
+
+
+class MultipleChoiceAnswer(Answer):
+    def __init__(self, fraction, value, feedback_text=''):
+        if fraction is None:
+            raise MandatoryFieldMissing('fraction')
+
+        self.fraction = fraction
+
+        if value is None:
+            raise MandatoryFieldMissing('value')
+
+        self.value = value
+        self.feedback_text = feedback_text
+
+    def __str__(self):
+        s = f'<answer fraction="{self.fraction}" format="html">'
+        s += f'<text><![CDATA[{self.value}]]></text>'
+        s += f'<feedback format="html"><text><![CDATA[{self.feedback_text}]]></text></feedback>'
+        s += '</answer>'
+        return s

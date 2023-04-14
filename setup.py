@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='noodle_quiz',
-      version='0.1.2',
+      version='0.1.3',
       description='Noodle-Quiz (Not Moodle Quiz generator) is a set of utilities to generate quizzes for Moodle',
       long_description=readme(),
       long_description_content_type='text/markdown',
